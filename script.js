@@ -1,11 +1,16 @@
-'use strict';
-
 const tbl = document.getElementById("tbl");
 const tableCount = document.getElementById("tableCount"); 
+const addBut = document.querySelector("#add");
+const delBut = document.querySelector("#del");
+const printBut = document.querySelector("#print");
 
-function add(){
+addBut.addEventListener('click', add);
+delBut.addEventListener('click', del);
+printBut.addEventListener('click', print);
+
+function add() {
   let tr = document.createElement("tr"); 
-  for(let i=0; i<2; i++){
+  for(let i = 0 ; i < 2; i++){
     let td = document.createElement("td");
     let inp = document.createElement("input");
     td.appendChild(inp);
@@ -16,8 +21,18 @@ function add(){
   tableCount.textContent = `count：${rw - 1}`;
 }
 
-function del(){
+function del() {
   let rw = tbl.rows.length;
-  rw === 1 ? rw : tbl.deleteRow(rw - 1);
-  rw === 1 ? tableCount.textContent = `count：${rw - 1}` : tableCount.textContent = `count：${rw - 2}`
+  if (rw === 1) {
+    tableCount.textContent = `count：${rw - 1}`;
+  } else {
+    tbl.deleteRow(rw - 1);
+    tableCount.textContent = `count：${rw - 2}`;
+  }
+}
+
+function print() {
+  const contents = document.querySelectorAll("input");
+  // console.log(contents.forEach(x => console.log(x, x.value)));
+  return console.log(contents.length);
 }
