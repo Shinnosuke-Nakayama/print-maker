@@ -71,13 +71,13 @@ function generatePDF() {
       ctx.fillStyle = "#000";
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
-      drawVerticalText(ctx, name, canvasWidth / 2, canvasHeight / 2 - (name.length * 125)); // 中央に配置
+      drawVerticalText(ctx, name, canvasWidth / 2, canvasHeight / 2 - (name.length * 150)); // 中央に配置
 
       // 右上の寄付額（小さなフォント、右上に縦書き）
       ctx.font = "250px serif";
       ctx.textAlign = "right";
       ctx.textBaseline = "top";
-      drawVerticalText(ctx, donation, canvasWidth - 100, 200); // 右上に配置
+      drawVerticalText(ctx, donation, canvasWidth - 150, 200); // 右上に配置
 
       canvases.push(canvas);
     });
