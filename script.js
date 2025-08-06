@@ -1,109 +1,110 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const table = document.getElementById("tbl");
-  const addBtn = document.getElementById("add");
-  const delBtn = document.getElementById("del");
-  const printBtn = document.getElementById("print");
-  const tableCount = document.getElementById("tableCount");
+const tbl = document.getElementById("tbl");
+const tableCount = document.getElementById("tableCount");
+const addBut = document.querySelector("#add");
+const delBut = document.querySelector("#del");
+const printBut = document.querySelector("#print");
 
-  function updateCount() {
-    tableCount.textContent = `count: ${table.rows.length - 1}`;
+// GitHub Pages上の画像URLに変更（ここを自分のURLに合わせて変更）
+const bgImageUrl = "https://nakayama-shinnosuke.github.io/print-maker/IMG_3991.jpeg";
+
+// A4サイズ（縦）ピクセル基準（300dpi: 約2480x3508）
+const canvasWidth = 2480;
+const canvasHeight = 3508;
+
+addBut.addEventListener('click', add);
+delBut.addEventListener('click', del);
+printBut.addEventListener('click', generatePDF);
+
+function add() {
+  let tr = document.createElement("tr");
+  for (let i = 0; i < 2; i++) {
+    let td = document.createElement("td");
+    let inp = document.createElement("input");
+    td.appendChild(inp);
+    tr.appendChild(td);
   }
-
-  addBtn.addEventListener("click", () => {
-    const row = table.insertRow(-1);
-
-    for (let i = 0; i < 2; i++) {
-      const cell = row.insertCell(i);
-      const input = document.createElement("input");
-      input.type = "text";
-      input.placeholder = i === 0 ? "名前" : "寄付";
-      cell.appendChild(input);
-    }
-    updateCount();
-  });
-
-  delBtn.addEventListener("click", () => {
-    if (table.rows.length > 1) {
-      table.deleteRow(-1);
-      updateCount();
-    }
-  });
-
-  printBtn.addEventListener("click", async () => {
-    const rows = [...table.rows].slice(1); // skip header
-    if (rows.length === 0) return;
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({
-      orientation: "portrait",
-      unit: "px",
-      format: "a4",
-    });
-
-    const A4_WIDTH = 595;
-    const A4_HEIGHT = 842;
-
-    const backgroundImage = await loadImage("https://raw.githubusercontent.com/Shinnosuke-Nakayama/print-maker/refs/heads/main/IMG_3991.jpeg");
-
-    for (let i = 0; i < rows.length; i++) {
-      if (i > 0) doc.addPage();
-
-      const canvas = document.createElement("canvas");
-      canvas.width = A4_WIDTH;
-      canvas.height = A4_HEIGHT;
-      const ctx = canvas.getContext("2d");
-
-      // 背景画像
-      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-
-      const name = rows[i].cells[0].querySelector("input").value;
-      const donation = rows[i].cells[1].querySelector("input").value;
-
-      ctx.fillStyle = "black";
-      ctx.font = "36px 'Yu Mincho', 'serif'";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      // 縦書きの名前を中央に配置（縦横中央）
-      const nameX = canvas.width / 2;
-      const nameY = canvas.height / 2;
-      drawVerticalText(ctx, name, nameX, nameY, "center");
-
-      // 寄付は右上に縦書き
-      const donationX = canvas.width - 60;
-      const donationY = 60;
-      drawVerticalText(ctx, donation, donationX, donationY, "top");
-
-      const imgData = canvas.toDataURL("image/png");
-      doc.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-    }
-
-    doc.save("output.pdf");
-  });
-
+  tbl.appendChild(tr);
   updateCount();
-});
-
-function drawVerticalText(ctx, text, x, y, align = "center") {
-  const lineHeight = 40;
-  const chars = text.split("");
-  const offset = align === "top"
-    ? 0
-    : align === "center"
-    ? -(chars.length - 1) * lineHeight / 2
-    : -chars.length * lineHeight;
-
-  chars.forEach((char, i) => {
-    ctx.fillText(char, x, y + offset + i * lineHeight);
-  });
 }
 
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous"; // CORS回避のため
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
+function del() {
+  let rowCount = tbl.rows.length;
+  if (rowCount > 1) {
+    tbl.deleteRow(rowCount - 1);
+    updateCount();
+  }
+}
+
+function updateCount() {
+  tableCount.textContent = `count：${tbl.rows.length - 1}`;
+}
+
+function generatePDF() {
+  const rows = Array.from(tbl.rows).slice(1); // ヘッダー除く
+  if (rows.length === 0) {
+    alert("テーブルに行がありません");
+    return;
+  }
+
+  const image = new Image();
+  image.crossOrigin = "anonymous";
+  image.src = bgImageUrl;
+
+  image.onload = () => {
+    const canvases = [];
+
+    rows.forEach((row, index) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      const ctx = canvas.getContext("2d");
+
+      // 背景画像描画
+      ctx.drawImage(image, 0, 0, canvasWidth, canvasHeight);
+
+      // テキスト抽出
+      const name = row.cells[0].querySelector("input")?.value || "";
+      const donation = row.cells[1].querySelector("input")?.value || "";
+
+      // 縦書きフォントスタイル
+      ctx.font = "100px serif";
+      ctx.fillStyle = "#000";
+      ctx.textBaseline = "top";
+      ctx.textAlign = "center";
+
+      // 名前を画像中央に縦書き
+      drawVerticalText(ctx, name, canvasWidth / 2, 400);
+
+      // 寄付額を画像右端に縦書き
+      drawVerticalText(ctx, donation, canvasWidth - 200, 400);
+
+      canvases.push(canvas);
+    });
+
+    // PDF生成
+    const pdf = new jspdf.jsPDF({
+      orientation: "portrait",
+      unit: "px",
+      format: [canvasWidth, canvasHeight]
+    });
+
+    canvases.forEach((canvas, i) => {
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+      if (i > 0) pdf.addPage();
+      pdf.addImage(imgData, "JPEG", 0, 0, canvasWidth, canvasHeight);
+    });
+
+    pdf.save("output.pdf");
+  };
+
+  image.onerror = () => {
+    alert("背景画像の読み込みに失敗しました。URLを確認してください。");
+  };
+}
+
+function drawVerticalText(ctx, text, x, startY) {
+  const chars = text.split("");
+  chars.forEach((char, i) => {
+    ctx.fillText(char, x, startY + i * 100);
   });
 }
