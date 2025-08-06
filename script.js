@@ -8,8 +8,8 @@ const printBut = document.querySelector("#print");
 const bgImageUrl = "https://raw.githubusercontent.com/Shinnosuke-Nakayama/print-maker/refs/heads/main/IMG_3991.jpeg";
 
 // A4サイズ（縦）ピクセル基準（300dpi: 約2480x3508）
-const canvasWidth = 2480;
-const canvasHeight = 3508;
+const canvasWidth = 595;
+const canvasHeight = 842;
 
 addBut.addEventListener('click', add);
 delBut.addEventListener('click', del);
