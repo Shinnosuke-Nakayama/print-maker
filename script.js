@@ -5,7 +5,7 @@ const delBut = document.querySelector("#del");
 const printBut = document.querySelector("#print");
 
 // GitHub Pages上の画像URLに変更（ここを自分のURLに合わせて変更）
-const bgImageUrl = "https://nakayama-shinnosuke.github.io/print-maker/IMG_3991.jpeg";
+const bgImageUrl = "https://raw.githubusercontent.com/Shinnosuke-Nakayama/print-maker/refs/heads/main/IMG_3991.jpeg";
 
 // A4サイズ（縦）ピクセル基準（300dpi: 約2480x3508）
 const canvasWidth = 2480;
