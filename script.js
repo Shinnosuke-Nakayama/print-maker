@@ -4,10 +4,10 @@ const addBut = document.querySelector("#add");
 const delBut = document.querySelector("#del");
 const printBut = document.querySelector("#print");
 
-// GitHub Pages上の画像URLに変更（ここを自分のURLに合わせて変更）
+// GitHub Pages上の画像URL
 const bgImageUrl = "https://raw.githubusercontent.com/Shinnosuke-Nakayama/print-maker/refs/heads/main/IMG_3991.jpeg";
 
-// A4サイズ（縦）ピクセル基準（300dpi: 約2480x3508）
+// A4縦（300dpi相当）のキャンバスサイズ
 const canvasWidth = 2480;
 const canvasHeight = 3508;
 
@@ -48,7 +48,7 @@ function generatePDF() {
 
   const image = new Image();
   image.crossOrigin = "anonymous";
-  image.src = "./IMG_3991.jpeg";
+  image.src = bgImageUrl;
 
   image.onload = () => {
     const canvases = [];
@@ -62,21 +62,22 @@ function generatePDF() {
       // 背景画像描画
       ctx.drawImage(image, 0, 0, canvasWidth, canvasHeight);
 
-      // テキスト抽出
+      // テキスト取得
       const name = row.cells[0].querySelector("input")?.value || "";
       const donation = row.cells[1].querySelector("input")?.value || "";
 
-      // 縦書きフォントスタイル
-      ctx.font = "100px serif";
+      // 中央の名前（大きなフォント、中央に縦書き）
+      ctx.font = "150px serif";
       ctx.fillStyle = "#000";
-      ctx.textBaseline = "top";
       ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      drawVerticalText(ctx, name, canvasWidth / 2, canvasHeight / 2 - (name.length * 75)); // 中央に配置
 
-      // 名前を画像中央に縦書き
-      drawVerticalText(ctx, name, canvasWidth / 2, 400);
-
-      // 寄付額を画像右端に縦書き
-      drawVerticalText(ctx, donation, canvasWidth - 200, 400);
+      // 右上の寄付額（小さなフォント、右上に縦書き）
+      ctx.font = "60px serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "top";
+      drawVerticalText(ctx, donation, canvasWidth - 100, 100); // 右上に配置
 
       canvases.push(canvas);
     });
@@ -102,9 +103,10 @@ function generatePDF() {
   };
 }
 
+// 縦書き描画（1文字ずつ縦に配置）
 function drawVerticalText(ctx, text, x, startY) {
   const chars = text.split("");
   chars.forEach((char, i) => {
-    ctx.fillText(char, x, startY + i * 100);
+    ctx.fillText(char, x, startY + i * parseInt(ctx.font)); // フォントサイズで縦間隔調整
   });
 }
