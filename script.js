@@ -1,3 +1,4 @@
+const body = document.querySelector("body");
 const tbl = document.getElementById("tbl");
 const tableCount = document.getElementById("tableCount"); 
 const addBut = document.querySelector("#add");
@@ -33,6 +34,11 @@ function del() {
 
 function print() {
   const contents = document.querySelectorAll("input");
-  // console.log(contents.forEach(x => console.log(x, x.value)));
-  return console.log(contents.length);
+  let rw = tbl.rows.length - 1;
+  for (let i = 0; i < rw; i++) {
+    let img = document.createElement("img");
+    img.src = "img.png" 
+    body.appendChild(img);
+    console.dir(img);
+  }
 }
