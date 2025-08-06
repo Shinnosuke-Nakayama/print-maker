@@ -40,7 +40,7 @@ function generatePDF() {
   const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
   const image = new Image();
-  image.src = "https://placehold.jp/150x220.png"; // 画像URLを差し替えてください
+  image.src = "https://raw.githubusercontent.com/Shinnosuke-Nakayama/print-maker/refs/heads/main/IMG_3991.jpeg"; // 画像URLを差し替えてください
 
   image.onload = function () {
     rows.forEach((row, idx) => {
