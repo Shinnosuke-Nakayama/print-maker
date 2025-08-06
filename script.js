@@ -67,14 +67,14 @@ function generatePDF() {
       const donation = row.cells[1].querySelector("input")?.value || "";
 
       // 中央の名前（大きなフォント、中央に縦書き）
-      ctx.font = "150px serif";
+      ctx.font = "350px serif";
       ctx.fillStyle = "#000";
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       drawVerticalText(ctx, name, canvasWidth / 2, canvasHeight / 2 - (name.length * 75)); // 中央に配置
 
       // 右上の寄付額（小さなフォント、右上に縦書き）
-      ctx.font = "60px serif";
+      ctx.font = "250px serif";
       ctx.textAlign = "right";
       ctx.textBaseline = "top";
       drawVerticalText(ctx, donation, canvasWidth - 100, 100); // 右上に配置
