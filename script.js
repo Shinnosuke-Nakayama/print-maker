@@ -37,7 +37,7 @@ function print() {
   let rw = tbl.rows.length - 1;
   for (let i = 0; i < rw; i++) {
     let img = document.createElement("img");
-    img.src = "https://github.com/Shinnosuke-Nakayama/print-maker/blob/main/IMG_3991.jpeg" 
+    img.src = "https://raw.githubusercontent.com/Shinnosuke-Nakayama/print-maker/refs/heads/main/IMG_3991.jpeg" 
     body.appendChild(img);
     console.dir(img);
   }
