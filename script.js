@@ -1,90 +1,109 @@
-const { jsPDF } = window.jspdf;
-const body = document.querySelector("body");
-const tbl = document.getElementById("tbl");
-const tableCount = document.getElementById("tableCount");
-const addBut = document.getElementById("add");
-const delBut = document.getElementById("del");
-const printBut = document.getElementById("print");
+document.addEventListener("DOMContentLoaded", function () {
+  const table = document.getElementById("tbl");
+  const addBtn = document.getElementById("add");
+  const delBtn = document.getElementById("del");
+  const printBtn = document.getElementById("print");
+  const tableCount = document.getElementById("tableCount");
 
-addBut.addEventListener('click', add);
-delBut.addEventListener('click', del);
-printBut.addEventListener('click', generatePDF);
-
-function add() {
-  const tr = document.createElement("tr");
-  for (let i = 0; i < 2; i++) {
-    const td = document.createElement("td");
-    const inp = document.createElement("input");
-    td.appendChild(inp);
-    tr.appendChild(td);
+  function updateCount() {
+    tableCount.textContent = `count: ${table.rows.length - 1}`;
   }
-  tbl.appendChild(tr);
-  updateCount();
-}
 
-function del() {
-  const rw = tbl.rows.length;
-  if (rw > 1) {
-    tbl.deleteRow(rw - 1);
-  }
-  updateCount();
-}
+  addBtn.addEventListener("click", () => {
+    const row = table.insertRow(-1);
 
-function updateCount() {
-  const rw = tbl.rows.length;
-  tableCount.textContent = `count：${rw - 1}`;
-}
+    for (let i = 0; i < 2; i++) {
+      const cell = row.insertCell(i);
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = i === 0 ? "名前" : "寄付";
+      cell.appendChild(input);
+    }
+    updateCount();
+  });
 
-function generatePDF() {
-  const rows = [...tbl.rows].slice(1);
-  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  delBtn.addEventListener("click", () => {
+    if (table.rows.length > 1) {
+      table.deleteRow(-1);
+      updateCount();
+    }
+  });
 
-  const image = new Image();
-  image.src = "https://raw.githubusercontent.com/Shinnosuke-Nakayama/print-maker/refs/heads/main/IMG_3991.jpeg"; // 画像URLを差し替えてください
+  printBtn.addEventListener("click", async () => {
+    const rows = [...table.rows].slice(1); // skip header
+    if (rows.length === 0) return;
 
-  image.onload = function () {
-    rows.forEach((row, idx) => {
-      const name = row.cells[0].querySelector("input")?.value || "";
-      const donation = row.cells[1].querySelector("input")?.value || "";
-
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-
-      canvas.width = 595;  // A4 width in pt
-      canvas.height = 842; // A4 height in pt
-
-      // 背景画像
-      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-      // 中央の文字（縦書き）
-      ctx.save();
-      ctx.font = "24px serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      const xCenter = canvas.width / 2;
-      const yCenter = canvas.height / 2;
-      const nameChars = name.split('');
-      nameChars.forEach((char, i) => {
-        ctx.fillText(char, xCenter, yCenter - (nameChars.length * 14) / 2 + i * 28);
-      });
-      ctx.restore();
-
-      // 右上の文字（縦書き）
-      ctx.save();
-      ctx.font = "20px serif";
-      ctx.textAlign = "right";
-      ctx.textBaseline = "top";
-      const rightText = donation.split('');
-      rightText.forEach((char, i) => {
-        ctx.fillText(char, canvas.width - 20, 20 + i * 22);
-      });
-      ctx.restore();
-
-      const imgData = canvas.toDataURL("image/png");
-      if (idx > 0) pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297); // A4サイズ(mm)
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "px",
+      format: "a4",
     });
 
-    pdf.save("print.pdf");
-  };
+    const A4_WIDTH = 595;
+    const A4_HEIGHT = 842;
+
+    const backgroundImage = await loadImage("https://raw.githubusercontent.com/Shinnosuke-Nakayama/print-maker/refs/heads/main/IMG_3991.jpeg");
+
+    for (let i = 0; i < rows.length; i++) {
+      if (i > 0) doc.addPage();
+
+      const canvas = document.createElement("canvas");
+      canvas.width = A4_WIDTH;
+      canvas.height = A4_HEIGHT;
+      const ctx = canvas.getContext("2d");
+
+      // 背景画像
+      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+      const name = rows[i].cells[0].querySelector("input").value;
+      const donation = rows[i].cells[1].querySelector("input").value;
+
+      ctx.fillStyle = "black";
+      ctx.font = "36px 'Yu Mincho', 'serif'";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      // 縦書きの名前を中央に配置（縦横中央）
+      const nameX = canvas.width / 2;
+      const nameY = canvas.height / 2;
+      drawVerticalText(ctx, name, nameX, nameY, "center");
+
+      // 寄付は右上に縦書き
+      const donationX = canvas.width - 60;
+      const donationY = 60;
+      drawVerticalText(ctx, donation, donationX, donationY, "top");
+
+      const imgData = canvas.toDataURL("image/png");
+      doc.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+    }
+
+    doc.save("output.pdf");
+  });
+
+  updateCount();
+});
+
+function drawVerticalText(ctx, text, x, y, align = "center") {
+  const lineHeight = 40;
+  const chars = text.split("");
+  const offset = align === "top"
+    ? 0
+    : align === "center"
+    ? -(chars.length - 1) * lineHeight / 2
+    : -chars.length * lineHeight;
+
+  chars.forEach((char, i) => {
+    ctx.fillText(char, x, y + offset + i * lineHeight);
+  });
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous"; // CORS回避のため
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
 }
