@@ -67,7 +67,7 @@ function generatePDF() {
       const donation = row.cells[1].querySelector("input")?.value || "";
 
       // 縦書きフォントスタイル
-      ctx.font = "100px serif";
+      ctx.font = "500px serif";
       ctx.fillStyle = "#000";
       ctx.textBaseline = "top";
       ctx.textAlign = "center";
