@@ -48,7 +48,7 @@ function generatePDF() {
 
   const image = new Image();
   image.crossOrigin = "anonymous";
-  image.src = "https://raw.githubusercontent.com/Shinnosuke-Nakayama/print-maker/refs/heads/main/IMG_3991.jpeg";
+  image.src = "./IMG_3991.jpeg";
 
   image.onload = () => {
     const canvases = [];
